@@ -29,12 +29,12 @@ start.state1.prototype = {
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         game.add.sprite(0, 0, "background");
         //toDo: make cool font
-        game.add.text(game.world.centerX, gameHaight, "Donuts were eaten:", {
+        game.add.text(game.world.centerX, gameHeight, "Donuts were eaten:", {
             font: "65px Arial",
             fill: "#5151b0",
             align: "center"
         }).anchor.setTo(0.5, 0);
-        scoreText = game.add.text(game.world.centerX, gameHaight + 70, score, {
+        scoreText = game.add.text(game.world.centerX, gameHeight + 70, score, {
             font: "65px Arial",
             fill: "#5151b0",
             align: "center"
@@ -430,5 +430,6 @@ function getHolesBelow(col, row) {
     }
     return result;
 }
+
 
 
