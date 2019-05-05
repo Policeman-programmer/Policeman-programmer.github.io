@@ -18,10 +18,10 @@ start.state1 = function () {
 };
 start.state1.prototype = {
     preload: function () {
-        game.load.image("background", "../resources/images/backgrounds/background.jpg");
-        game.load.image("shadow", "../resources/images/game/shadow.png");
+        game.load.image("background", "./resources/images/backgrounds/background.jpg");
+        game.load.image("shadow", "./resources/images/game/shadow.png");
         for (let i = 1; i <= gameOptions.donutTypes; i++) {
-            game.load.image('donut' + i, '../resources/images/game/gem-' + i + '.png');
+            game.load.image('donut' + i, './resources/images/game/gem-' + i + '.png');
         }
     },
     create: function () {
