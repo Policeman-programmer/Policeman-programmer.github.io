@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="App">
+<head>
+    <title>ToDo List (Task2)</title>
+    <script src="Libraries/angular.js"></script>
+    <link href="Libraries/bootstrap.css" rel="stylesheet"/>
+    <link href="Libraries/bootstrap-theme.css" rel="stylesheet"/>
+    <script src="todo.js"></script>
+    <script>
+        var app = angular.module("App", []);
+
+        app.controller("MainCtrl", function ($scope) {
+            // $scope.tasks = todoModel.read();
+            $scope.data = [];
+            var result;
+            $scope.calculate = function () {
+                result = $scope.prise * $scope.length / 1000;
+                $scope.data.push({
+                    name: $scope.name,
+                    length: $scope.length,
+                    width: $scope.width,
+                    prise: $scope.prise,
+                    result: result
+                });
+                console.log("calculate",result)
+            }
+        });
+    </script>
+
+</head>
+<body ng-controller="MainCtrl">
+
+<div class="container">
+
+    <h3>Розрахунок вартості</h3>
+
+    <div class="row panel-primary">
+        <div class="col-sm-4">
+            <label style="margin-bottom: 30px">Назва</label>
+            <input ng-model="name" class="form-control">
+        </div>
+        <div class="col-sm-2">
+            <label style="margin-bottom: 30px">Довжина (мм)</label>
+            <input ng-model="length" class="form-control">
+        </div>
+        <div class="col-sm-2">
+            <label style="margin-bottom: 30px">Ширина (мм)</label>
+            <input ng-model="width" class="form-control">
+        </div>
+        <div class="col-sm-2">
+            <label>Вартість за п.м.</label>
+            <label>(1 m x 10 cm) </label>
+            <input ng-model="prise" class="form-control">
+        </div>
+        <div class="col-sm-2">
+            <button style="margin-top: 50px" class="btn btn-primary btn-md" ng-click="calculate()">Розрахувати</button>
+        </div>
+    </div>
+
+    <br>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Назва</th>
+            <th>Довжина (мм)</th>
+            <th>Ширина (мм)</th>
+            <th>
+                <p style="margin-bottom: 0px">Вартість за п.м.</p>
+                <p style="margin-bottom: 0px">(1 m x 10 cm) </p>
+            </th>
+            <th>Загальна вартість</th>
+        </tr>
+        </thead>
+        <tr ng-repeat="item in data" class="row">
+            <td class="col-sm-4">{{item.name}}</td>
+            <td class="col-sm-2">{{item.length}}</td>
+            <td class="col-sm-2">{{item.width}}</td>
+            <td class="col-sm-2">{{item.prise}}</td>
+            <td class="col-sm-2">{{item.result}}</td>
+        </tr>
+    </table>
+
+</div>
+</body>
+</html>

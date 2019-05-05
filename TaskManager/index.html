@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="TaskManager">
+<head>
+    <title>Task Manager</title>
+
+    <script src="Libraries/jquery-3.3.1.min.js"></script>
+    <script src="Libraries/jquery-ui.min.js"></script>
+    <link href="Libraries/bootstrap-theme.css" rel="stylesheet"/>
+    <link href="Libraries/bootstrap.css" rel="stylesheet"/>
+    <script src="Libraries/angular.js"></script>
+    <script src="angularJS/model.js"></script>
+    <script src="angularJS/module.js"></script>
+    <script src="Libraries/angular-dragdrop.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body ng-controller="TaskManagerCtrl">
+<div class="panel-primary container">
+    <div class="panel-heading">MY TASK MANAGER</div>
+
+    <!--<div>{{toDo}}</div>-->
+    <!--&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+    <!--<div>{{inProcess}}</div>-->
+    <!--&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+    <!--<div>{{done}}</div>-->
+
+    <div class="panel-body row text-center">
+
+        <div id="plusToDo" class="col-md-4">
+            <label>To do</label>
+            <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalAddTask"
+                    ng-click="defineTask($event)" style="float: right;">+</button>
+
+            <div class="thumbnail" ng-model="toDo" style="min-height: 84vh"
+                 data-drop="true" data-jqyoui-options="{accept:'.well:not([ng-model=toDo])'}" jqyoui-droppable="{multiple:true,onDrop:'dropCallback'}"> <!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
+
+                <div class="well" ng-repeat="task in toDo"
+                     ng-show="task.title" data-drag="true" data-jqyoui-options="{revert: 'invalid'}" ng-model="toDo"
+                     jqyoui-draggable="{index: {{$index}},animate:true}">
+                    <!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
+                    <h2>{{task.title}}</h2>
+                    <p>{{task.description}}</p>
+                    <p>{{task.date}}</p>
+                    <button class="btn btn-danger btn-sm" ng-click="defineTask($event, task)"
+                            data-toggle="modal" data-target="#confirm">-</button>
+                </div>
+            </div>
+        </div>
+        <!--------------------------------------------------------------------------------------------------------------------->
+        <div id="plusInProcess" class="col-md-4">
+            <label>In progress</label>
+            <button class="btn btn-info buttonPlus btn-sm" data-toggle="modal"
+                    data-target="#modalAddTask" ng-click="defineTask($event)" style="float: right;">+</button>
+
+            <div class="thumbnail" ng-model="inProcess" style="min-height: 84vh"
+                 data-drop="true" data-jqyoui-options="{accept:'.well:not([ng-model=inProcess])'}" jqyoui-droppable="{multiple:true,onDrop:'dropCallback'}" > <!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
+
+                <div class="well" ng-repeat="task in inProcess"
+                     ng-show="task.title" data-drag="true" data-jqyoui-options="{revert: 'invalid'}" ng-model="inProcess"
+                     jqyoui-draggable="{index: {{$index}},animate:true}">
+                    <!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
+                    <h2>{{task.title}}</h2>
+                    <p>{{task.description}}</p>
+                    <p>{{task.date}}</p>
+                    <button class="btn btn-danger btn-sm" ng-click="defineTask($event, task)"
+                            data-toggle="modal" data-target="#confirm">-</button>
+                </div>
+            </div>
+        </div>
+        <!--------------------------------------------------------------------------------------------------------------------->
+        <div id="plusDone" class="col-md-4">
+            <label>Done</label>
+            <button class="btn btn-info buttonPlus btn-sm" data-toggle="modal"
+                    data-target="#modalAddTask" ng-click="defineTask($event)" style="float: right;">+</button>
+
+            <div class="thumbnail" ng-model="done" style="min-height: 84vh"
+                 data-drop="true" jqyoui-droppable data-jqyoui-options>
+
+                <div class="well" ng-repeat="task in done"
+                     ng-show="task.title" data-drag="true" data-jqyoui-options="{revert: 'invalid'}" ng-model="done"
+                     jqyoui-draggable="{index: {{$index}},animate:true}">
+                    <h2>{{task.title}}</h2>
+                    <p>{{task.description}}</p>
+                    <p>{{task.date}}</p>
+                    <button  class="btn btn-danger btn-sm" ng-click="defineTask($event, task)"
+                             data-toggle="modal" data-target="#confirm">-</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--------------------------------------------------------------------------------------------------------------------->
+    <div id="modalAddTask" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4>Describe your task</h4>
+                </div>
+                <div class="modal-body">
+                    <label for="input1">Header</label>
+                    <input class="form-control" id="input1" ng-model="taskTitle">
+                    <label for="input2">Title</label>
+                    <textarea class="form-control" id="input2" ng-model="taskDescription"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" ng-click="addTask()" data-dismiss="modal">Ok</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="confirm" class="modal fade" role="dialog">
+        <div class="modal-dialog" style="width: 300px">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p>Are you sure you want to delete task ?</p>
+                    <button type="button" class="btn btn-default" ng-click="removeTask()" data-dismiss="modal">Ok</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
