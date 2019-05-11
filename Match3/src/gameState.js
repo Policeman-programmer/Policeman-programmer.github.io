@@ -9,10 +9,13 @@ let gameOptions = {
     destroySpeed: 200
 };
 
-let audioKill,
+var audioKill,
     audioSelect,
     audioSelect4,
-    shadowOffset = 10;
+    audioBackground,
+    shadowOffset = 10,
+    hand,
+    emitter;
 
 var score = 0;
 
@@ -25,27 +28,39 @@ WebFontConfig = {
 
 state.gameState = function () {
 };
+
 state.gameState.prototype = {
     preload: function () {
-        game.load.script("webfont", "//fonts.googleapis.com/css?family=Fredoka+One");
+        for (let i = 1; i <= gameOptions.donutTypes; i++) {
+            game.load.image('donut' + i, './resources/images/game/gem-' + i + '.png');
+        }
         game.load.image("background", "./resources/images/backgrounds/background.jpg");
         game.load.image("shadow", "./resources/images/game/shadow.png");
         game.load.image("score", "./resources/images/bg-score.png");
         game.load.image("timeup", "./resources/images/text-timeup.png");
-        for (let i = 1; i <= gameOptions.donutTypes; i++) {
-            game.load.image('donut' + i, './resources/images/game/gem-' + i + '.png');
-        }
+        game.load.image("sound", "./resources/images/btn-sfx.png");
+        game.load.image("particle_ex1", "./resources/images/particles/particle_ex1.png");
+        // game.load.image("hand", "./resources/images/game/hand.png");
 
         game.load.audio('startMusic', ['./resources/audio/background.mp3']);
         game.load.audio('select', ['./resources/audio/select-1.mp3']);
         game.load.audio('select4', ['./resources/audio/select-4.mp3']);
         game.load.audio('kill', ['./resources/audio/kill.mp3']);
+
+        game.load.script("webfont", "//fonts.googleapis.com/css?family=Fredoka+One");
     },
     create: function () {
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        emitter = game.add.emitter(0, 0, 100);
+        emitter.makeParticles('particle_ex1');
+        emitter.gravity = 200;
+
+        game.add.button(scoreWidth * 2, gameHeight + scoreHeight / 2, 'sound', soundOnOff, this, 2, 1, 0).anchor.setTo(0, 0.6);
         game.stage.backgroundColor = backgroundColor;
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         game.add.sprite(0, 0, "background");
         game.add.sprite(0, gameHeight, "score");
+        // hand = game.add.sprite(0, gameHeight, "hand");
         game.scoreText = game.add.text(scoreWidth / 2, gameHeight + scoreHeight / 2, score, {
             font: "65px Fredoka One",
             fill: "#f8fffd",
@@ -61,7 +76,10 @@ state.gameState.prototype = {
         game.timerText.anchor.setTo(0, 0.6);
         game.timeTo_ms = new Date().getTime() + timeAtStart_ms;
 
-        // game.add.audio('startMusic').play();
+        if (!audioBackground) {
+            audioBackground = game.add.audio('startMusic', 1, true).play();
+        }
+
         audioKill = game.add.audio('kill');
         audioSelect = game.add.audio('select');
         audioSelect4 = game.add.audio('select4');
@@ -78,8 +96,29 @@ state.gameState.prototype = {
         if (timeDistance_ms <= 0) {
             gameOver();
         }
+        // hand.bringToTop();
+        // hand.x = game.input.mousePointer.x;
+        // hand.y = game.input.mousePointer.y;
     }
 };
+
+function soundOnOff(soundImg) {
+    if (audioBackground.isPlaying) {
+        audioBackground.stop();
+        audioKill.mute = true;
+        audioSelect.mute = true;
+        audioSelect4.mute = true;
+        soundImg.alpha = 0.5;
+        soundImg.tint = 0xff0000;
+    } else {
+        audioBackground.play();
+        audioKill.mute = false;
+        audioSelect.mute = false;
+        audioSelect4.mute = false;
+        soundImg.alpha = 1;
+        soundImg.tint = 0xffffff;
+    }
+}
 
 function drawField() {
     game.gameArray = [];
@@ -195,11 +234,11 @@ function swapDonuts(donut1, donut2, swapBack) {
         }, gameOptions.swapSpeed, Phaser.Easing.Linear.None, true);
     }
 
-    swapSprites(donut1.shadow,donut2.shadow);
-    swapSprites(donut1.donutSprite,donut2.donutSprite);
+    swapSprites(donut1.shadow, donut2.shadow);
+    swapSprites(donut1.donutSprite, donut2.donutSprite);
 
-    swapSprites(donut2.shadow,donut1.shadow);
-    var orb2Tween = swapSprites(donut2.donutSprite,donut1.donutSprite);
+    swapSprites(donut2.shadow, donut1.shadow);
+    var orb2Tween = swapSprites(donut2.donutSprite, donut1.donutSprite);
 
     var tempDonut1 = Object.assign({}, donut1);
     donut1.donutNumber = donut2.donutNumber;
@@ -317,7 +356,6 @@ function checkVerticalMatches() {
             }
         }
     }
-    console.log(game.removeMap);
 }
 
 
@@ -332,6 +370,12 @@ function destroyDonuts() {
                 // game.gameArray[col][row].shadow.destroy();
                 let shadowTween = disappear(game.gameArray[col][row].shadow);
                 let destroyTween = disappear(game.gameArray[col][row].donutSprite);
+
+                emitter.x = game.gameArray[col][row].donutSprite.x;
+                emitter.y = game.gameArray[col][row].donutSprite.y;
+                // emitter.z = -10;
+                emitter.start(true, 2000, null, 10);
+
                 game.gameArray[col][row] = null;
                 destroyed++;
                 score++;
