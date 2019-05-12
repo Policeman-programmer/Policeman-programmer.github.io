@@ -66,7 +66,7 @@ state.gameState.prototype = {
 
         game.add.sprite(0, 0, "background");
         game.add.sprite(0, gameHeight, "score");
-        hand = game.add.sprite(0, gameHeight, "hand");
+        hand = game.add.sprite(game.world._height, game.world._width, "hand");
 
         game.scoreText = game.add.text(scoreWidth / 2, gameHeight + scoreHeight / 2, score, {
             font: "65px Fredoka One",
