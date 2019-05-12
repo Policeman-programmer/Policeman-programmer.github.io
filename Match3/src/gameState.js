@@ -9,25 +9,28 @@ let gameOptions = {
     destroySpeed: 200
 };
 
-var audioKill,
+let score = 0,
+    audioKill,
     audioSelect,
     audioSelect4,
     audioBackground,
-    shadowOffset = 10,
     hand,
-    emitter;
+    emitter,
+    emitter2,
+    emitter3,
+    emitter4,
+    emitter5;
 
-var score = 0;
-
-const TIME = "Time: ",
+const hendOffset = 20,
+    shadowOffset = 10,
+    TIME = "Time: ",
     timeAtStart_ms = 30000;
 
 WebFontConfig = {
     google: {families: ['Fredoka One']}
 };
 
-state.gameState = function () {
-};
+state.gameState = function () {};
 
 state.gameState.prototype = {
     preload: function () {
@@ -39,8 +42,15 @@ state.gameState.prototype = {
         game.load.image("score", "./resources/images/bg-score.png");
         game.load.image("timeup", "./resources/images/text-timeup.png");
         game.load.image("sound", "./resources/images/btn-sfx.png");
+        game.load.image("hand", "./resources/images/game/hand.png");
+        game.load.image("particle1", "./resources/images/particles/particle-1.png");
+        game.load.image("particle2", "./resources/images/particles/particle-2.png");
+        game.load.image("particle3", "./resources/images/particles/particle-3.png");
+        game.load.image("particle4", "./resources/images/particles/particle-4.png");
+        game.load.image("particle5", "./resources/images/particles/particle-5.png");
         game.load.image("particle_ex1", "./resources/images/particles/particle_ex1.png");
-        // game.load.image("hand", "./resources/images/game/hand.png");
+        game.load.image("particle_ex2", "./resources/images/particles/particle_ex2.png");
+        game.load.image("particle_ex3", "./resources/images/particles/particle_ex3.png");
 
         game.load.audio('startMusic', ['./resources/audio/background.mp3']);
         game.load.audio('select', ['./resources/audio/select-1.mp3']);
@@ -50,17 +60,14 @@ state.gameState.prototype = {
         game.load.script("webfont", "//fonts.googleapis.com/css?family=Fredoka+One");
     },
     create: function () {
-        game.physics.startSystem(Phaser.Physics.ARCADE);
-        emitter = game.add.emitter(0, 0, 100);
-        emitter.makeParticles('particle_ex1');
-        emitter.gravity = 200;
-
         game.add.button(scoreWidth * 2, gameHeight + scoreHeight / 2, 'sound', soundOnOff, this, 2, 1, 0).anchor.setTo(0, 0.6);
         game.stage.backgroundColor = backgroundColor;
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+
         game.add.sprite(0, 0, "background");
         game.add.sprite(0, gameHeight, "score");
-        // hand = game.add.sprite(0, gameHeight, "hand");
+        hand = game.add.sprite(0, gameHeight, "hand");
+
         game.scoreText = game.add.text(scoreWidth / 2, gameHeight + scoreHeight / 2, score, {
             font: "65px Fredoka One",
             fill: "#f8fffd",
@@ -88,6 +95,12 @@ state.gameState.prototype = {
         game.canPick = true;
         game.selectedDonut = null;
         game.donutGroup.onChildInputDown.add(donutSelect, this);
+
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        emitter = game.add.emitter(0, 0, 100);
+        let keyAndFrameArr = ['particle_ex1','particle_ex2','particle_ex3'];
+        emitter.makeParticles(keyAndFrameArr,keyAndFrameArr);
+        emitter.gravity = 1000;
     },
     update: function () {
         game.scoreText.text = score;
@@ -96,9 +109,9 @@ state.gameState.prototype = {
         if (timeDistance_ms <= 0) {
             gameOver();
         }
-        // hand.bringToTop();
-        // hand.x = game.input.mousePointer.x;
-        // hand.y = game.input.mousePointer.y;
+        hand.bringToTop();
+        hand.x = game.input.mousePointer.x -hendOffset;
+        hand.y = game.input.mousePointer.y - hendOffset;
     }
 };
 
@@ -181,9 +194,7 @@ function donutSelect(pointer) {
     console.log('col(x) :' + col + "; row(y) :" + row);
     let pickedDonut = donutAt(col, row);
     console.log("pickedDonut", pickedDonut);
-    col = Math.floor(pickedDonut.donutSprite.position.x / gameOptions.donutWidth);
-    row = Math.floor(pickedDonut.donutSprite.position.y / gameOptions.donutHeight);
-    console.log('donutCol(x) :' + col + "; donutRow(y) :" + row);
+
     if (pickedDonut !== -1) {
         if (game.selectedDonut == null) {
             audioSelect.play();
@@ -241,12 +252,9 @@ function swapDonuts(donut1, donut2, swapBack) {
     var orb2Tween = swapSprites(donut2.donutSprite, donut1.donutSprite);
 
     var tempDonut1 = Object.assign({}, donut1);
-    donut1.donutNumber = donut2.donutNumber;
-    donut1.donutSprite = donut2.donutSprite;
-    donut1.shadow = donut2.shadow;
-    donut2.donutNumber = tempDonut1.donutNumber;
-    donut2.donutSprite = tempDonut1.donutSprite;
-    donut2.shadow = tempDonut1.shadow;
+
+    replaceDonut(donut1,donut2);
+    replaceDonut(donut2,tempDonut1);
 
     orb2Tween.onComplete.add(function () {
         if (!matchInBoard() && swapBack) {
@@ -261,6 +269,12 @@ function swapDonuts(donut1, donut2, swapBack) {
             }
         }
     });
+
+    function replaceDonut(donut1,donut2) {
+        donut1.donutNumber = donut2.donutNumber;
+        donut1.donutSprite = donut2.donutSprite;
+        donut1.shadow = donut2.shadow;
+    }
 }
 
 function matchInBoard() {
@@ -366,23 +380,24 @@ function destroyDonuts() {
         for (let row = 0; row < gameOptions.fieldHeight; row++) {
             if (game.gameArray[col][row] == null)
                 continue;
-            if (game.removeMap[col][row] > 0) {
-                // game.gameArray[col][row].shadow.destroy();
-                let shadowTween = disappear(game.gameArray[col][row].shadow);
-                let destroyTween = disappear(game.gameArray[col][row].donutSprite);
 
-                emitter.x = game.gameArray[col][row].donutSprite.x;
-                emitter.y = game.gameArray[col][row].donutSprite.y;
-                // emitter.z = -10;
-                emitter.start(true, 2000, null, 10);
+            if (game.removeMap[col][row] > 0) {
+                let donutToDestroy = game.gameArray[col][row].donutSprite,
+                    shadowDestroyed = disappear(game.gameArray[col][row].shadow),
+                    donutDestroyed = disappear(donutToDestroy);
+
+                emitter.x = donutToDestroy.x + gameOptions.donutWidth/2;
+                emitter.y = donutToDestroy.y + gameOptions.donutHeight/2;
+                emitter.start(true, 500, null, 8);
 
                 game.gameArray[col][row] = null;
                 destroyed++;
                 score++;
                 game.timeTo_ms += 1000;
-                shadowTween.onComplete.add(function (shadow) {
+
+                shadowDestroyed.onComplete.add(function (shadow) {
                     shadow.destroy();
-                    destroyTween.onComplete.add(function (donut) {
+                    donutDestroyed.onComplete.add(function (donut) {
                         donut.destroy();
                         destroyed--;
                         if (destroyed === 0) {
